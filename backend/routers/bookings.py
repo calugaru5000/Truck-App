@@ -106,6 +106,20 @@ def owner_bookings(user: dict = Depends(require_owner), db: sqlite3.Connection =
     return [dict(r) for r in rows]
 
 
+@router.get("/eligible-review/{truck_id}")
+def eligible_review(truck_id: int, user: dict = Depends(require_customer), db: sqlite3.Connection = Depends(get_db)):
+    row = db.execute(
+        """
+        SELECT b.id FROM bookings b
+        LEFT JOIN reviews r ON r.booking_id = b.id
+        WHERE b.truck_id = ? AND b.customer_id = ? AND b.status = 'completed' AND r.id IS NULL
+        LIMIT 1
+        """,
+        (truck_id, user["id"]),
+    ).fetchone()
+    return {"booking_id": row["id"] if row else None}
+
+
 @router.patch("/{booking_id}/status")
 def update_status(
     booking_id: int,

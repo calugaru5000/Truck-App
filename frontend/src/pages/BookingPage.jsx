@@ -1,9 +1,24 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
+import DatePicker from 'react-datepicker'
 import { Truck, Calendar, DollarSign, ArrowLeft, CheckCircle } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LangContext'
+
+const DateInput = forwardRef(({ value, onClick, placeholder }, ref) => (
+  <button
+    type="button"
+    onClick={onClick}
+    ref={ref}
+    className="input-field flex items-center gap-2 text-left cursor-pointer hover:border-brand-400 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+  >
+    <Calendar className="w-4 h-4 text-brand-500 flex-shrink-0" />
+    <span className={value ? 'text-gray-900' : 'text-gray-400'}>
+      {value || placeholder}
+    </span>
+  </button>
+))
 
 export default function BookingPage() {
   const { truckId } = useParams()
@@ -17,9 +32,17 @@ export default function BookingPage() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
 
-  const today = new Date().toISOString().split('T')[0]
-  const [form, setForm] = useState({ start_date: today, end_date: '', notes: '' })
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const [startDate, setStartDate] = useState(today)
+  const [endDate, setEndDate] = useState(null)
+  const [notes, setNotes] = useState('')
   const [totalDays, setTotalDays] = useState(0)
+
+  function toYMD(date) {
+    if (!date) return ''
+    return date.toISOString().split('T')[0]
+  }
 
   useEffect(() => {
     if (!user || user.user_type !== 'customer') {
@@ -33,11 +56,13 @@ export default function BookingPage() {
   }, [truckId, user])
 
   useEffect(() => {
-    if (form.start_date && form.end_date) {
-      const diff = (new Date(form.end_date) - new Date(form.start_date)) / (1000 * 60 * 60 * 24)
+    if (startDate && endDate) {
+      const diff = (endDate - startDate) / (1000 * 60 * 60 * 24)
       setTotalDays(diff > 0 ? diff : 0)
+    } else {
+      setTotalDays(0)
     }
-  }, [form.start_date, form.end_date])
+  }, [startDate, endDate])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -45,10 +70,15 @@ export default function BookingPage() {
     if (totalDays <= 0) { setError(t('booking.invalidDateRange')); return }
     setSubmitting(true)
     try {
-      await axios.post('/api/bookings', { truck_id: truckId, ...form })
+      await axios.post('/api/bookings', {
+        truck_id: truckId,
+        start_date: toYMD(startDate),
+        end_date: toYMD(endDate),
+        notes,
+      })
       setSuccess(true)
     } catch (err) {
-      setError(err.response?.data?.error || 'Booking failed')
+      setError(err.response?.data?.detail || err.response?.data?.error || 'Booking failed')
     } finally {
       setSubmitting(false)
     }
@@ -113,28 +143,28 @@ export default function BookingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                <Calendar className="w-4 h-4 inline mr-1" /> {t('booking.startDate')}
+                {t('booking.startDate')}
               </label>
-              <input
-                type="date"
-                required
-                min={today}
-                className="input-field"
-                value={form.start_date}
-                onChange={e => setForm({ ...form, start_date: e.target.value })}
+              <DatePicker
+                selected={startDate}
+                onChange={date => { setStartDate(date); if (endDate && date >= endDate) setEndDate(null) }}
+                minDate={today}
+                dateFormat="dd MMM yyyy"
+                customInput={<DateInput placeholder="Select start date" />}
+                popperPlacement="bottom-start"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                <Calendar className="w-4 h-4 inline mr-1" /> {t('booking.endDate')}
+                {t('booking.endDate')}
               </label>
-              <input
-                type="date"
-                required
-                min={form.start_date || today}
-                className="input-field"
-                value={form.end_date}
-                onChange={e => setForm({ ...form, end_date: e.target.value })}
+              <DatePicker
+                selected={endDate}
+                onChange={date => setEndDate(date)}
+                minDate={startDate ? new Date(startDate.getTime() + 86400000) : today}
+                dateFormat="dd MMM yyyy"
+                customInput={<DateInput placeholder="Select end date" />}
+                popperPlacement="bottom-start"
               />
             </div>
           </div>
@@ -145,8 +175,8 @@ export default function BookingPage() {
               className="input-field resize-none"
               rows={3}
               placeholder={t('booking.notesPlaceholder')}
-              value={form.notes}
-              onChange={e => setForm({ ...form, notes: e.target.value })}
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
             />
           </div>
 

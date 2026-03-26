@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
 import {
   Truck, MapPin, Weight, DollarSign, Phone, Mail,
-  User, Calendar, ArrowLeft, Star, AlertCircle
+  User, Calendar, ArrowLeft, Star, AlertCircle, MessageSquare, CheckCircle
 } from 'lucide-react'
 import StarRating from '../components/StarRating'
 import ReviewCard from '../components/ReviewCard'
@@ -18,6 +18,12 @@ export default function TruckDetail() {
   const [truck, setTruck] = useState(null)
   const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
+  const [eligibleBookingId, setEligibleBookingId] = useState(null)
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewComment, setReviewComment] = useState('')
+  const [reviewSubmitting, setReviewSubmitting] = useState(false)
+  const [reviewError, setReviewError] = useState('')
+  const [reviewDone, setReviewDone] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -30,6 +36,34 @@ export default function TruckDetail() {
       navigate('/trucks')
     }).finally(() => setLoading(false))
   }, [id])
+
+  useEffect(() => {
+    if (user?.user_type === 'customer') {
+      axios.get(`/api/bookings/eligible-review/${id}`)
+        .then(res => setEligibleBookingId(res.data.booking_id))
+        .catch(() => {})
+    }
+  }, [id, user])
+
+  async function handleReviewSubmit(e) {
+    e.preventDefault()
+    setReviewError('')
+    setReviewSubmitting(true)
+    try {
+      const res = await axios.post('/api/reviews', {
+        booking_id: eligibleBookingId,
+        rating: reviewRating,
+        comment: reviewComment.trim() || null
+      })
+      setReviews(prev => [res.data, ...prev])
+      setEligibleBookingId(null)
+      setReviewDone(true)
+    } catch (err) {
+      setReviewError(err.response?.data?.detail || err.response?.data?.error || t('customerDash.failedReview'))
+    } finally {
+      setReviewSubmitting(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -124,6 +158,51 @@ export default function TruckDetail() {
             <h2 className="font-bold text-gray-900 text-xl mb-4">
               {t('truckDetail.reviews')} ({reviews.length})
             </h2>
+
+            {eligibleBookingId && !reviewDone && (
+              <div className="card border-2 border-brand-200 bg-brand-50 mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <MessageSquare className="w-5 h-5 text-brand-600" />
+                  <h3 className="font-semibold text-brand-800">{t('truckDetail.writeReview')}</h3>
+                </div>
+                <p className="text-sm text-brand-700 mb-4">{t('truckDetail.reviewNote')}</p>
+                {reviewError && (
+                  <div className="mb-3 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{reviewError}</div>
+                )}
+                <form onSubmit={handleReviewSubmit} className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('customerDash.rating')} *</label>
+                    <div className="flex items-center gap-3">
+                      <StarRating rating={reviewRating} onRate={setReviewRating} size="lg" />
+                      <span className="text-sm text-gray-500">{reviewRating} / 5</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <MessageSquare className="w-4 h-4 inline mr-1" />{t('customerDash.comment')}
+                    </label>
+                    <textarea
+                      className="input-field resize-none"
+                      rows={3}
+                      placeholder={t('customerDash.commentPlaceholder')}
+                      value={reviewComment}
+                      onChange={e => setReviewComment(e.target.value)}
+                    />
+                  </div>
+                  <button type="submit" disabled={reviewSubmitting} className="btn-primary w-full">
+                    {reviewSubmitting ? t('customerDash.submitting') : t('customerDash.submitReview')}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {reviewDone && (
+              <div className="card border border-green-200 bg-green-50 mb-4 flex items-center gap-3 text-green-700">
+                <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                <p className="text-sm font-medium">{t('truckDetail.reviewDone')}</p>
+              </div>
+            )}
+
             {reviews.length === 0 ? (
               <div className="card text-center text-gray-400 py-8">
                 <Star className="w-8 h-8 mx-auto mb-2 opacity-40" />

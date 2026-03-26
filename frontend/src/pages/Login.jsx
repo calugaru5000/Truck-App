@@ -27,7 +27,7 @@ export default function Login() {
       const dest = res.data.user.user_type === 'owner' ? '/owner/dashboard' : '/customer/dashboard'
       navigate(dest, { replace: true })
     } catch (err) {
-      setError(err.response?.data?.error || t('auth.loginFailed'))
+      setError(err.response?.data?.detail || err.response?.data?.error || t('auth.loginFailed'))
     } finally {
       setLoading(false)
     }

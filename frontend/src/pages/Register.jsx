@@ -30,7 +30,7 @@ export default function Register() {
       login(res.data.token, res.data.user)
       navigate(form.user_type === 'owner' ? '/owner/dashboard' : '/customer/dashboard', { replace: true })
     } catch (err) {
-      setError(err.response?.data?.error || t('auth.registerFailed'))
+      setError(err.response?.data?.detail || err.response?.data?.error || t('auth.registerFailed'))
     } finally {
       setLoading(false)
     }

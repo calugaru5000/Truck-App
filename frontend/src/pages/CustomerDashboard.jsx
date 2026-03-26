@@ -47,7 +47,7 @@ export default function CustomerDashboard() {
       await axios.patch(`/api/bookings/${id}/status`, { status: 'cancelled' })
       setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled' } : b))
     } catch (err) {
-      alert(err.response?.data?.error || t('customerDash.failedCancel'))
+      alert(err.response?.data?.detail || err.response?.data?.error || t('customerDash.failedCancel'))
     }
   }
 
@@ -193,7 +193,7 @@ function ReviewModal({ booking, onClose, onSubmitted }) {
       })
       onSubmitted(booking.id, res.data)
     } catch (err) {
-      setError(err.response?.data?.error || t('customerDash.failedReview'))
+      setError(err.response?.data?.detail || err.response?.data?.error || t('customerDash.failedReview'))
     } finally {
       setSubmitting(false)
     }

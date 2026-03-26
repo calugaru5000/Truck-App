@@ -52,7 +52,7 @@ export default function OwnerDashboard() {
       await axios.delete(`/api/trucks/${id}`)
       setTrucks(prev => prev.filter(t => t.id !== id))
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to delete')
+      alert(err.response?.data?.detail || err.response?.data?.error || 'Failed to delete')
     }
   }
 
@@ -61,7 +61,7 @@ export default function OwnerDashboard() {
       await axios.patch(`/api/bookings/${bookingId}/status`, { status })
       setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status } : b))
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to update')
+      alert(err.response?.data?.detail || err.response?.data?.error || 'Failed to update')
     }
   }
 

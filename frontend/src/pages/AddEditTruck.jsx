@@ -54,7 +54,7 @@ export default function AddEditTruck() {
       }
       navigate('/owner/dashboard')
     } catch (err) {
-      setError(err.response?.data?.error || t('addTruck.failedSave'))
+      setError(err.response?.data?.detail || err.response?.data?.error || t('addTruck.failedSave'))
     } finally {
       setSubmitting(false)
     }

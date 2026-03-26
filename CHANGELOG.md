@@ -5,6 +5,38 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.5.0] — 2026-03-26
+
+### Changed
+- **Date pickers on Booking page** replaced with a styled `react-datepicker` component that matches the site's brand:
+  - Inputs now show a branded orange calendar icon and clear placeholder text, making them obviously clickable
+  - Calendar popup has an orange header, orange selected-day highlight, and light-orange hover states — consistent with the rest of the UI
+  - End date automatically prevents selecting a date before or equal to the start date
+  - Changing the start date clears the end date if it would become invalid
+  - Dates display in human-readable `dd MMM yyyy` format (e.g. `26 Mar 2026`) instead of the raw browser default
+- Added `react-datepicker` dependency (`frontend/package.json`)
+- Added brand-colour CSS overrides for `react-datepicker` in `index.css`
+
+---
+
+## [1.4.0] — 2026-03-26
+
+### Added
+- **Inline review form on Truck Detail page** — customers with a completed, unreviewed booking for a truck now see a "Write a Review" form directly in the reviews section, without having to go to the Customer Dashboard
+- `GET /api/bookings/eligible-review/{truck_id}` — new backend endpoint that checks if the authenticated customer has a completed, unreviewed booking for a given truck; returns `{"booking_id": int|null}`
+- New translation keys: `truckDetail.writeReview`, `truckDetail.reviewDone`, `truckDetail.reviewNote` (EN + RO)
+
+### Fixed
+- **SQLite threading crash** (`ProgrammingError: SQLite objects created in a thread can only be used in that same thread`) — added `check_same_thread=False` to `sqlite3.connect()` in `database.py`; root cause was FastAPI's thread pool executing sync route functions in different threads than the one that opened the connection
+- **Error messages not displaying** — FastAPI raises `HTTPException` with a `detail` field, but the frontend was reading `data.error` (always `undefined`), causing all backend error messages to silently fall back to generic text. Fixed in all 7 error handlers across:
+  - `Login.jsx`, `Register.jsx`
+  - `BookingPage.jsx`, `AddEditTruck.jsx`
+  - `OwnerDashboard.jsx` (delete truck, update booking status)
+  - `CustomerDashboard.jsx` (cancel booking, submit review)
+- **"Make" label** renamed to **"Brand"** in English (`addTruck.make` translation key)
+
+---
+
 ## [1.3.0] — 2026-03-26
 
 ### Changed — Backend rewritten from Node.js/Express to Python/FastAPI

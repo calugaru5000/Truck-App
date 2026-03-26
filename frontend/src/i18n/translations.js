@@ -115,6 +115,9 @@ const translations = {
       ownerConfirms: 'Owner confirms within 24 hours',
       avgLabel: 'avg',
       tons: 'tons',
+      writeReview: 'Write a Review',
+      reviewDone: 'Thank you! Your review has been posted.',
+      reviewNote: 'You have a completed booking for this truck — share your experience!',
     },
     booking: {
       backToTruck: 'Back to truck',
@@ -185,7 +188,7 @@ const translations = {
       backToDash: 'Back to Dashboard',
       editTitle: 'Edit Truck',
       addTitle: 'Add New Truck',
-      make: 'Make',
+      make: 'Brand',
       makePlaceholder: 'e.g. Volvo',
       model: 'Model',
       modelPlaceholder: 'e.g. FH16',
@@ -352,6 +355,9 @@ const translations = {
       ownerConfirms: 'Proprietarul confirmă în 24 de ore',
       avgLabel: 'medie',
       tons: 'tone',
+      writeReview: 'Scrie o recenzie',
+      reviewDone: 'Mulțumim! Recenzia ta a fost publicată.',
+      reviewNote: 'Ai o rezervare finalizată pentru acest camion — împărtășește experiența ta!',
     },
     booking: {
       backToTruck: 'Înapoi la camion',
