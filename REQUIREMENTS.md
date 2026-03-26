@@ -197,9 +197,9 @@ TruckHub is a full-stack web application that allows users to browse, book, and 
 | Layer | Technology |
 |-------|-----------|
 | Frontend | React 18, Vite, TailwindCSS, React Router v6, Axios, Lucide Icons |
-| Backend | Node.js, Express 4 |
-| Database | SQLite via built-in `node:sqlite` (Node.js ≥ 22.5 required) |
-| Auth | JWT (jsonwebtoken), bcryptjs |
+| Backend | Python 3.11+, FastAPI, uvicorn |
+| Database | SQLite via Python built-in `sqlite3` |
+| Auth | JWT (python-jose), passlib/bcrypt, FastAPI `Depends()` |
 | i18n | Custom React context — English & Romanian |
 
 ---
@@ -207,14 +207,16 @@ TruckHub is a full-stack web application that allows users to browse, book, and 
 ## 7. Setup & Running
 
 ### Requirements
-- Node.js v22.5.0 or higher
+- Python 3.11 or higher
+- Node.js (frontend only)
 
 ### Start Backend
 ```bash
 cd backend
-npm install
-node server.js
+pip install -r requirements.txt
+python -m uvicorn main:app --reload --port 5000
 # → http://localhost:5000
+# → API docs: http://localhost:5000/docs
 ```
 
 ### Start Frontend

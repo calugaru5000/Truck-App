@@ -5,9 +5,9 @@ A full-stack truck booking platform where customers can browse and book trucks, 
 ## Tech Stack
 
 - **Frontend**: React + Vite + TailwindCSS + React Router
-- **Backend**: Node.js + Express
-- **Database**: SQLite via Node.js built-in `node:sqlite` (requires Node.js 22.5+)
-- **Auth**: JWT (jsonwebtoken) + bcryptjs
+- **Backend**: Python + FastAPI + uvicorn
+- **Database**: SQLite via Python built-in `sqlite3`
+- **Auth**: JWT (python-jose) + passlib/bcrypt
 
 ## Features
 
@@ -22,16 +22,16 @@ A full-stack truck booking platform where customers can browse and book trucks, 
 
 ```
 Truck-App/
-├── backend/          # Express API server
-│   ├── server.js
-│   ├── db.js         # SQLite setup & schema
-│   ├── middleware/
-│   │   └── auth.js   # JWT middleware
-│   └── routes/
-│       ├── auth.js
-│       ├── trucks.js
-│       ├── bookings.js
-│       └── reviews.js
+├── backend/          # FastAPI server (Python)
+│   ├── main.py       # App entry point
+│   ├── database.py   # SQLite setup & schema
+│   ├── auth.py       # JWT helpers & Depends() guards
+│   ├── requirements.txt
+│   └── routers/
+│       ├── auth.py
+│       ├── trucks.py
+│       ├── bookings.py
+│       └── reviews.py
 └── frontend/         # React + Vite app
     └── src/
         ├── context/AuthContext.jsx
@@ -55,15 +55,17 @@ Truck-App/
 ## Getting Started
 
 ### Requirements
-- Node.js v22.5.0 or higher (v24+ recommended)
+- Python 3.11 or higher
+- Node.js (for the frontend only)
 
 ### Backend
 
 ```bash
 cd backend
-npm install
-node server.js
+pip install -r requirements.txt
+python -m uvicorn main:app --reload --port 5000
 # Runs on http://localhost:5000
+# Interactive API docs: http://localhost:5000/docs
 ```
 
 ### Frontend
